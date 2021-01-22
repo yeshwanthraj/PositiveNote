@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Smileytude</string>
+    <string name="action_settings">Settings</string>
+    <string name="noteTitle">What made you smile today?</string>
+    <string name="noteDetails">More details…</string>
+    <string name="save">Save</string>
+    <string name="reminder_desc">Select time at which you would like to be reminded to make a note</string>
+    <string name="done">Done</string>
+    <string name="today">today</string>
+    <string name="yesterday">yesterday</string>
+    <string name="date_label">Note for</string>
+    <string name="edit">edit</string>
+    <string name="delete">Delete</string>
+    <string name="confirm_delete">Note is empty. Delete note?</string>
+    <string name="cancel">Cancel</string>
+</resources>
