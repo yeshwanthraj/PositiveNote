@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Smileytude</string>
     <string name="action_settings">Settings</string>
-    <string name="noteTitle">What made you smile today?</string>
-    <string name="noteDetails">More details…</string>
+    <string name="noteTitle">Sweet &amp; short title</string>
+    <string name="noteDetails">What made you smile today?</string>
     <string name="save">Save</string>
     <string name="reminder_desc">Select time at which you would like to be reminded to make a note</string>
     <string name="done">Done</string>

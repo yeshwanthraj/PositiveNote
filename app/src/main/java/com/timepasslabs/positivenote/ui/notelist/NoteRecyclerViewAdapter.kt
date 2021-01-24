@@ -1,5 +1,6 @@
 package com.timepasslabs.positivenote.ui.notelist
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,8 +22,9 @@ class NoteRecyclerViewAdapter(
 		return NoteViewHolder(view)
 	}
 
-	override fun onBindViewHolder(holder: NoteViewHolder, position: Int) =
+	override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
 		holder.bindData(noteList[position])
+	}
 
 	override fun getItemCount(): Int = noteList.size
 
@@ -41,10 +43,13 @@ class NoteRecyclerViewAdapter(
 		}
 
 		fun bindData(note : Note) {
+			Log.d(TAG, "bindData: note is $note")
 			title.text = note.title
 			desc.text = note.details
-			date.text = DateUtil.getDateForSpinner(note.date)
+			title.visibility = if(note.title.isEmpty()) View.GONE else View.VISIBLE
+			desc.visibility = if(note.details.isEmpty()) View.GONE else View.VISIBLE
+			Log.d(TAG, "bindData: visibility of title : ${title.visibility} and ${desc.visibility}")
+			date.text = DateUtil.getDateForListItem(note.date)
 		}
 	}
-
 }

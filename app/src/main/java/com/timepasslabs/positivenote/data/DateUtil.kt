@@ -18,6 +18,16 @@ object DateUtil {
 
     private const val DATE_DELIMITER = "/"
 
+    private val weekDateNumToString  = mapOf(
+        1 to "Sunday",
+        2 to "Monday",
+        3 to "Tuesday",
+        4 to "Wednesday",
+        5 to "Thursday",
+        6 to "Friday",
+        7 to "Saturday"
+    )
+
     fun getDateForDb(uiDate : String) : String {
         val calendar : Calendar
         when(uiDate.toUpperCase()) {
@@ -44,37 +54,33 @@ object DateUtil {
         val currentDate = Calendar.getInstance()
         val noteDate = Calendar.getInstance()
         noteDate.time = storedDateFormat.parse(storedDate) ?: Date()
-        Log.d(TAG, "getDateForSpinner: week of the year is ${currentDate.get(Calendar.WEEK_OF_YEAR)}")
-        Log.d(
-            TAG,
-            "getDateForSpinner: week of the month is ${currentDate.get(Calendar.WEEK_OF_MONTH)}"
-        )
-        return if(isSameDate(currentDate,noteDate)) {
-            "today"
-        } else {
-            currentDate.add(Calendar.DAY_OF_MONTH, -1)
-            return if (isSameDate(currentDate, noteDate)) {
-                "yesterday"
-            } else {
-                uiDateFormat.format(noteDate.time)
-            }
+        return when(getDaysBetweenDates(currentDate,noteDate)) {
+            0 -> "Today"
+            1 -> "Yesterday"
+            else -> uiDateFormat.format(noteDate.time)
+        }
+    }
+
+    fun getDateForListItem(storedDate: String) : String {
+        val currentDate = Calendar.getInstance()
+        val noteDate = Calendar.getInstance()
+        noteDate.time = storedDateFormat.parse(storedDate) ?: Date()
+        val daysBetweenDates = getDaysBetweenDates(currentDate,noteDate)
+        Log.d(TAG, "getDateForListItem: diff $daysBetweenDates")
+        return when(daysBetweenDates) {
+            0 -> "Today"
+            1 -> "Yesterday"
+            else -> return if(daysBetweenDates < 7)
+                    weekDateNumToString[noteDate.get(Calendar.DAY_OF_WEEK)] ?: error("")
+                else
+                    uiDateFormat.format(noteDate.time)
         }
     }
 
     fun getDateForSpinner(dayOfTheMonth : Int,month : Int,year : Int) =
         "$dayOfTheMonth$DATE_DELIMITER${month + 1}$DATE_DELIMITER$year"
 
-    private fun isSameDate(dateOne : Calendar, dateTwo : Calendar) : Boolean {
-        val dayOne = dateOne.get(Calendar.DAY_OF_MONTH)
-        val monthOne = dateOne.get(Calendar.MONTH)
-        val yearOne = dateOne.get(Calendar.YEAR)
+    private fun getDaysBetweenDates(currentDate: Calendar, pastDate: Calendar) : Int =
+        abs(currentDate.get(Calendar.DAY_OF_YEAR) - pastDate.get(Calendar.DAY_OF_YEAR))
 
-        val dayTwo = dateTwo.get(Calendar.DAY_OF_MONTH)
-        val monthTwo = dateTwo.get(Calendar.MONTH)
-        val yearTwo = dateTwo.get(Calendar.YEAR)
-
-        return dayOne == dayTwo
-                && monthOne == monthTwo
-                && yearOne == yearTwo
-    }
 }

@@ -1,6 +1,7 @@
 package com.timepasslabs.positivenote.ui.noteDetail
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -8,6 +9,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.skydoves.powerspinner.OnSpinnerOutsideTouchListener
 import com.skydoves.powerspinner.SpinnerGravity
@@ -55,10 +58,18 @@ class EditNoteFragment : Fragment() {
 		super.onViewCreated(view, savedInstanceState)
 		setupSpinner()
 		note?.let { populateViews(note!!) }
+		if (noteDetails.requestFocus()) {
+			if(note != null) {
+				val imm =
+					requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+				imm.showSoftInput(noteDetails, InputMethodManager.SHOW_IMPLICIT)
+			} else {
+				requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+			}
+		}
 	}
 
 	private fun setupSpinner() {
-		Log.d(TAG, "setupSpinner: ")
 		dateSpinner.apply {
 			showArrow = true
 			arrowPadding = 4
@@ -112,7 +123,8 @@ class EditNoteFragment : Fragment() {
 
 	fun getNote() : Note? =
 		if(noteTitle.text.isNotEmpty()
-			&& noteDetails.text.isNotEmpty()) {
+			|| noteDetails.text.isNotEmpty()) {
+			// Updating already existing note or create new note
 			note?.let {
 				Note(
 					noteTitle.text.toString(),

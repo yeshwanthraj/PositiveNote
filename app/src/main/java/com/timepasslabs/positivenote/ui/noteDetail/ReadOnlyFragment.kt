@@ -48,6 +48,8 @@ class ReadOnlyFragment : Fragment() {
 	private fun showNote(note : Note) {
 		noteTitle.text = note.title
 		noteDetails.text = note.details
+		noteTitle.visibility = if(note.title.isEmpty()) View.GONE else View.VISIBLE
+		noteDetails.visibility = if(note.details.isEmpty()) View.GONE else View.VISIBLE
 		dateDesc.text = DateUtil.getDateForSpinner(note.date!!)
 	}
 }
