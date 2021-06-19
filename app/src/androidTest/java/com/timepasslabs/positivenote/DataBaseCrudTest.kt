@@ -8,13 +8,16 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.timepasslabs.positivenote.data.Note
 import com.timepasslabs.positivenote.data.NoteDao
 import com.timepasslabs.positivenote.data.NoteDatabase
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-//@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4::class)
 @LargeTest
+@ExperimentalCoroutinesApi
 class DataBaseCrudTest {
 
     private val noteDao : NoteDao by lazy {
@@ -33,7 +36,7 @@ class DataBaseCrudTest {
 
     @Test
     suspend fun insertNote() : Unit {
-        runBlocking {
+        runBlockingTest {
             noteDao.insertNote(testNote)
         }
         val latestCount = getCurrentNoteCount()
@@ -44,7 +47,7 @@ class DataBaseCrudTest {
     suspend fun updateNote() {
         val updatedNoteTitle = "updated ${testNote.title}"
         val updatedNote = Note(updatedNoteTitle,testNote.details,testNote.date,testNote.lastUpdate,testNote.id)
-        runBlocking {
+        runBlockingTest {
             noteDao.insertNote(updatedNote)
         }
         val storedNote = noteDao.getNote(testNote.id)
@@ -53,7 +56,7 @@ class DataBaseCrudTest {
 
     @Test
     suspend fun deleteNote() {
-        runBlocking {
+        runBlockingTest {
             noteDao.deleteNote(testNote)
         }
         val latestCount = getCurrentNoteCount()

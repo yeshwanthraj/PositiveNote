@@ -80,6 +80,7 @@ object DateUtil {
     fun getDateForSpinner(dayOfTheMonth : Int,month : Int,year : Int) =
         "$dayOfTheMonth$DATE_DELIMITER${month + 1}$DATE_DELIMITER$year"
 
+    //TODO: this fails if the year is different
     private fun getDaysBetweenDates(currentDate: Calendar, pastDate: Calendar) : Int =
         abs(currentDate.get(Calendar.DAY_OF_YEAR) - pastDate.get(Calendar.DAY_OF_YEAR))
 
