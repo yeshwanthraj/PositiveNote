@@ -12,11 +12,16 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
 import com.skydoves.powerspinner.OnSpinnerOutsideTouchListener
 import com.skydoves.powerspinner.SpinnerGravity
 import com.timepasslabs.positivenote.R
 import com.timepasslabs.positivenote.data.Note
 import com.timepasslabs.positivenote.data.DateUtil
+import com.timepasslabs.positivenote.databinding.FragmentEditNoteBinding
 import kotlinx.android.synthetic.main.fragment_edit_note.*
 import java.util.*
 
@@ -26,14 +31,20 @@ private const val TAG = "EditNoteFragment"
 
 class EditNoteFragment : Fragment() {
 
-	private var note: Note? = null
+	private lateinit var note: Note
 
 	private val daySelectionList = listOf("today","yesterday","pick date")
 
 	private var currentSelection = 0
 
+	private val noteDetailViewModel by lazy {
+		ViewModelProvider(requireActivity()).get(NoteDetailViewModel::class.java)
+	}
+
+	private lateinit var viewBinding : FragmentEditNoteBinding
+
 	companion object {
-		fun newInstance(note: Note?) =
+		fun newInstance(note: Note) =
 			EditNoteFragment().apply {
 				arguments = Bundle().apply {
 					putParcelable(NOTE, note)
@@ -44,21 +55,23 @@ class EditNoteFragment : Fragment() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		arguments?.let {
-			note = it.getParcelable(NOTE)
+			note = it.getParcelable(NOTE) ?: Note()
 		}
 	}
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
 		savedInstanceState: Bundle?
-	): View =
-		inflater.inflate(R.layout.fragment_edit_note, container, false)
+	): View {
+		viewBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_edit_note,container,false)
+		viewBinding.note = note
+		return viewBinding.root
+	}
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 		setupSpinner()
-		note?.let { populateViews(note!!) }
-		if (noteDetails.requestFocus()) {
+		if (viewBinding.noteDetails.requestFocus()) {
 			if(note != null) {
 				val imm =
 					requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -69,8 +82,12 @@ class EditNoteFragment : Fragment() {
 		}
 	}
 
+	fun updateNote() {
+//		if(note)
+	}
+
 	private fun setupSpinner() {
-		dateSpinner.apply {
+		viewBinding.dateSpinner.apply {
 			showArrow = true
 			arrowPadding = 4
 			arrowResource = R.drawable.ic_arrow_down
@@ -93,19 +110,13 @@ class EditNoteFragment : Fragment() {
 		}
 	}
 
-	private fun populateViews(note: Note) {
-		noteTitle.setText(note.title)
-		noteDetails.setText(note.details)
-		dateSpinner.text = DateUtil.getDateForSpinner(note.date!!)
-	}
-
 	private fun showCalenderDialog() {
 		val calender = Calendar.getInstance()
 		val datePickerDialog = DatePickerDialog(
 			requireContext(),
 			{ _, year, month, dayOfMonth ->
 				val dateString = DateUtil.getDateForSpinner(dayOfMonth, month, year)
-				dateSpinner.text = dateString
+				note.date = DateUtil.getDateForDb(dateString)
 			},
 			calender.get(Calendar.YEAR),
 			calender.get(Calendar.MONTH),

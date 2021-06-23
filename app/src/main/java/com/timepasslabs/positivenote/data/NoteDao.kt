@@ -2,8 +2,10 @@ package com.timepasslabs.positivenote.data
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Singleton
 
 @Dao
+@Singleton
 interface NoteDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -16,6 +18,6 @@ interface NoteDao {
     fun getNote(id : Int) : Note
 
     @Delete
-    suspend fun deleteNote(note : Note)
+    suspend fun deleteNoteList(notes : List<Note>)
 
 }

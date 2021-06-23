@@ -3,7 +3,6 @@ package com.timepasslabs.positivenote.data
 import android.annotation.SuppressLint
 import android.util.Log
 import java.text.SimpleDateFormat
-import java.time.temporal.ChronoUnit
 import java.util.*
 import kotlin.math.abs
 

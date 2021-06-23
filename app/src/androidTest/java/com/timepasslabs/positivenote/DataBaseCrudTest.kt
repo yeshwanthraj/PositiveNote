@@ -1,6 +1,5 @@
 package com.timepasslabs.positivenote
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -57,7 +56,7 @@ class DataBaseCrudTest {
     @Test
     suspend fun deleteNote() {
         runBlockingTest {
-            noteDao.deleteNote(testNote)
+            noteDao.deleteNoteList(testNote)
         }
         val latestCount = getCurrentNoteCount()
         assert(latestCount == noteCount?.minus(1))

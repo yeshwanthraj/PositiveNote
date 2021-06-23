@@ -4,18 +4,18 @@ import android.os.Parcelable
 import android.util.Log
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.android.parcel.IgnoredOnParcel
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
+import java.util.*
 
 private const val TAG = "Note"
 
 @Entity(tableName = "notes")
 @Parcelize
 data class Note (
-    val title : String = "",
-    val details : String = "",
-    val date : String,
-    val lastUpdate: Long,
+    var title : String = "",
+    var details : String = "",
+    var date : Calendar,
+    var lastUpdate: Long,
     @PrimaryKey(autoGenerate = true) val id : Int = 0
 ) : Parcelable {
 

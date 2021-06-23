@@ -1,57 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.noteDetail.NoteDetailActivity">
+<layout>
+    <data>
+        <import type="com.timepasslabs.positivenote.data.Note"/>
+        <import type="com.timepasslabs.positivenote.data.DateUtil"/>
+        <import type="android.view.View"/>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+        <variable
+            name="note"
+            type="Note" />
+        <variable
+            name="dateUtil"
+            type="DateUtil" />
+    </data>
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        tools:context=".ui.noteDetail.NoteDetailActivity">
 
-        <TextView
-            android:id="@+id/dateDesc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_margin="12dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="32dp"
-            android:text="12/09/1994"
-            android:textStyle="italic"
-            />
-
-        <TextView
-            android:id="@+id/noteTitle"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/dateDesc"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            />
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/noteDetails"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_constraintTop_toBottomOf="@id/noteTitle"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="24dp"
-            android:layout_marginStart="22dp"
-            android:layout_marginEnd="24dp"
-            android:gravity="top"
-            android:paddingTop="12dp"
-            android:textSize="18sp"
-            />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/dateDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_margin="12dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginEnd="32dp"
+                android:text="@{dateUtil.getDateForSpinner(note.date)"
+                android:textStyle="italic"
+                />
 
-</ScrollView>
+            <TextView
+                android:id="@+id/noteTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/dateDesc"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:text="@{note.title}"
+                android:visibility="@{note.title.empty? View.GONE : View.VISIBLE}"
+                />
+
+            <TextView
+                android:id="@+id/noteDetails"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constraintTop_toBottomOf="@id/noteTitle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp"
+                android:layout_marginStart="22dp"
+                android:layout_marginEnd="24dp"
+                android:gravity="top"
+                android:paddingTop="12dp"
+                android:textSize="18sp"
+                android:text="@{note.details}"
+                android:visibility="@{note.title.empty? View.GONE : View.VISIBLE"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+</layout>

@@ -2,17 +2,17 @@ package com.timepasslabs.positivenote.ui.noteDetail
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
-import com.timepasslabs.positivenote.PositiveNoteApplication
+import com.timepasslabs.positivenote.CustomViewModelFactory
+import com.timepasslabs.positivenote.NoteApplication
 import com.timepasslabs.positivenote.R
 import com.timepasslabs.positivenote.data.Note
-import kotlinx.coroutines.launch
+import com.timepasslabs.positivenote.databinding.ActivityNoteDetailBinding
+import javax.inject.Inject
 
 private const val TAG = "NewNoteActivity"
 
@@ -31,13 +31,18 @@ class NoteDetailActivity : AppCompatActivity() {
 
 	private lateinit var currentFragment : Fragment
 
-	private val viewModel : NoteDetailViewModel by viewModels {
-		NoteDetailViewModelFactory((application as PositiveNoteApplication).repository)
+	@Inject lateinit var viewModelFactory: CustomViewModelFactory
+
+	private val viewModel : NoteDetailViewModel by viewModels { viewModelFactory }
+
+	private val viewBinding by lazy {
+		ActivityNoteDetailBinding.inflate(layoutInflater)
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		setContentView(R.layout.activity_new_note)
+		(application as NoteApplication).appComponent.inject(this)
+		setContentView(viewBinding.root)
 		isNewNote = intent.getBooleanExtra(IS_NEW_NOTE,false)
 		supportActionBar?.setDisplayHomeAsUpEnabled(true)
 		supportActionBar?.setDisplayShowHomeEnabled(true)
@@ -45,9 +50,9 @@ class NoteDetailActivity : AppCompatActivity() {
 		note = intent.getParcelableExtra(NOTE_EXTRA)
 		currentFragment = if(isNewNote) {
 			EditNoteFragment.newInstance(note)
-		} else (
-				ReadOnlyFragment.newInstance(note!!)
-				)
+		} else {
+			ReadOnlyFragment.newInstance(note!!)
+		}
 		supportActionBar!!.title = if(isNewNote) "New entry" else ""
 		supportFragmentManager.beginTransaction().run {
 			add(R.id.fragmentContainer,currentFragment)
@@ -56,7 +61,7 @@ class NoteDetailActivity : AppCompatActivity() {
 
 	override fun onBackPressed() {
 		if(!isReadOnly) {
-			saveNote()
+			(currentFragment as EditNoteFragment).updateNote()
 		} else {
 			setResult(RESULT_OK)
 			finish()
@@ -77,14 +82,12 @@ class NoteDetailActivity : AppCompatActivity() {
 				onBackPressed()
 			}
 			R.id.save -> {
-				saveNote()
+				(currentFragment as EditNoteFragment).updateNote()
 			}
 			R.id.delete -> {
-				lifecycleScope.launch {
-					viewModel.noteRepository.deleteNote(note!!)
-					setResult(RESULT_OK)
-					finish()
-				}
+				viewModel.deleteNote(note!!)
+				setResult(RESULT_OK)
+				finish()
 			}
 			R.id.edit -> {
 				isReadOnly = false
@@ -103,11 +106,9 @@ class NoteDetailActivity : AppCompatActivity() {
 			AlertDialog.Builder(this)
 				.setMessage(R.string.confirm_delete)
 				.setPositiveButton(R.string.delete) { _, _ ->
-					lifecycleScope.launch {
-						viewModel.noteRepository.deleteNote(note!!)
-						setResult(RESULT_OK)
-						finish()
-					}
+					viewModel.deleteNote(note!!)
+					setResult(RESULT_OK)
+					finish()
 				}
 				.setNegativeButton(R.string.cancel) { dialogInterface, _ ->
 					dialogInterface.dismiss()
@@ -120,7 +121,7 @@ class NoteDetailActivity : AppCompatActivity() {
 		val currentNote = (currentFragment as EditNoteFragment).getNote()
 		currentNote?.let {
 			lifecycleScope.launch {
-				viewModel.noteRepository.addNote(currentNote)
+				viewModel.addNote(currentNote)
 				setResult(RESULT_OK)
 				finish()
 			}

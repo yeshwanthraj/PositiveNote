@@ -1,28 +1,18 @@
 package com.timepasslabs.positivenote.data
 
-import android.util.Log
 import androidx.annotation.WorkerThread
-import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class NoteRepository private constructor(private val noteDao: NoteDao) {
-
-    companion object {
-
-        @Volatile var INSTANCE : NoteRepository? = null
-
-        fun newInstance(noteDao: NoteDao) : NoteRepository =
-            INSTANCE?: synchronized(this) {
-                INSTANCE?: NoteRepository(noteDao).also { INSTANCE = it }
-            }
-    }
+@Singleton
+class NoteRepository @Inject constructor(private val noteDao: NoteDao) {
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
     suspend fun addNote(note: Note) {
         noteDao.insertNote(note)
     }
-
 
     fun getAllNotes() : Flow<List<Note>> {
         return noteDao.getAllNotes()
@@ -31,6 +21,11 @@ class NoteRepository private constructor(private val noteDao: NoteDao) {
     @SuppressWarnings("RedundantSuspendModifier")
     @WorkerThread
     suspend fun deleteNote(note: Note) {
-        noteDao.deleteNote(note)
+        noteDao.deleteNoteList(listOf(note))
+    }
+
+    @WorkerThread
+    suspend fun deleteNotes(notes : List<Note>) {
+        noteDao.deleteNoteList(notes)
     }
 }

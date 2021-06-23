@@ -6,14 +6,19 @@ import com.timepasslabs.positivenote.data.NoteRepository
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-class MainActivityViewModel(
-	private val noteRepository: NoteRepository
-) : ViewModel() {
+class NoteListViewModel(private val noteRepository: NoteRepository) : ViewModel() {
 
 	var noteList : LiveData<List<Note>> = noteRepository.getAllNotes().asLiveData()
 
-	fun insertNote(note : Note) = viewModelScope.launch {
-		noteRepository.addNote(note)
+	fun deleteNote(noteList : List<Note>) {
+		viewModelScope.launch {
+			noteRepository.deleteNotes(noteList)
+		}
+	}
+
+	override fun onCleared() {
+		super.onCleared()
+		viewModelScope.cancel()
 	}
 
 }
