@@ -14,7 +14,7 @@ private const val TAG = "Note"
 data class Note (
     var title : String = "",
     var details : String = "",
-    var date : Calendar,
+    var date : String,
     var lastUpdate: Long,
     @PrimaryKey(autoGenerate = true) val id : Int = 0
 ) : Parcelable {

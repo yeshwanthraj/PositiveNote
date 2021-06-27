@@ -44,13 +44,6 @@ class MainActivity : AppCompatActivity() {
 		fetchData()
 	}
 
-	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-		super.onActivityResult(requestCode, resultCode, data)
-		if(requestCode == NEW_NOTE_REQUEST_CODE && resultCode == RESULT_CANCELED) {
-			Toast.makeText(this, "Empty note discarded", Toast.LENGTH_SHORT).show()
-		}
-	}
-
 	private fun fetchData() {
 		viewModel.noteList.observe(this, { noteList ->
 			setupRecyclerView(noteList)

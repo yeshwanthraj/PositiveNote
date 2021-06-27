@@ -7,12 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import com.timepasslabs.positivenote.R
+import com.timepasslabs.positivenote.DateUtil
 import com.timepasslabs.positivenote.data.Note
 import com.timepasslabs.positivenote.databinding.FragmentReadOnlyBinding
 
 private val NOTE = "note"
 
-
+private const val TAG = "ReadOnlyFragment"
 class ReadOnlyFragment : Fragment() {
 
 	private lateinit var note: Note
@@ -37,9 +38,10 @@ class ReadOnlyFragment : Fragment() {
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
 		savedInstanceState: Bundle?
-	): View? {
+	): View {
 		viewBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_read_only,container,false)
 		viewBinding.note = note
+		viewBinding.dateUtil = DateUtil
 		return viewBinding.root
 	}
 }

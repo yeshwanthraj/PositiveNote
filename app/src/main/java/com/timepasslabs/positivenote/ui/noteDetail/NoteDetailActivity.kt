@@ -2,6 +2,7 @@ package com.timepasslabs.positivenote.ui.noteDetail
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
@@ -16,7 +17,7 @@ import javax.inject.Inject
 
 private const val TAG = "NewNoteActivity"
 
-class NoteDetailActivity : AppCompatActivity() {
+class NoteDetailActivity : AppCompatActivity(),EditNoteFragment.NoteDetailCallback {
 
 	companion object {
 		val NOTE_EXTRA = "note"
@@ -31,6 +32,10 @@ class NoteDetailActivity : AppCompatActivity() {
 
 	private lateinit var currentFragment : Fragment
 
+	val noteDetailComponent by lazy {
+		(application as NoteApplication).appComponent.getNoteDetailComponent()
+	}
+
 	@Inject lateinit var viewModelFactory: CustomViewModelFactory
 
 	private val viewModel : NoteDetailViewModel by viewModels { viewModelFactory }
@@ -41,7 +46,7 @@ class NoteDetailActivity : AppCompatActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		(application as NoteApplication).appComponent.inject(this)
+		noteDetailComponent.create().inject(this)
 		setContentView(viewBinding.root)
 		isNewNote = intent.getBooleanExtra(IS_NEW_NOTE,false)
 		supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -63,7 +68,6 @@ class NoteDetailActivity : AppCompatActivity() {
 		if(!isReadOnly) {
 			(currentFragment as EditNoteFragment).updateNote()
 		} else {
-			setResult(RESULT_OK)
 			finish()
 		}
 	}
@@ -85,14 +89,12 @@ class NoteDetailActivity : AppCompatActivity() {
 				(currentFragment as EditNoteFragment).updateNote()
 			}
 			R.id.delete -> {
-				viewModel.deleteNote(note!!)
-				setResult(RESULT_OK)
-				finish()
+				showDeleteNoteDialog()
 			}
 			R.id.edit -> {
 				isReadOnly = false
 				invalidateOptionsMenu()
-				currentFragment = EditNoteFragment.newInstance(note)
+				currentFragment = EditNoteFragment.newInstance(note!!)
 				supportFragmentManager.beginTransaction().apply {
 					replace(R.id.fragmentContainer,currentFragment)
 				}.commit()
@@ -101,13 +103,16 @@ class NoteDetailActivity : AppCompatActivity() {
 		return true
 	}
 
+	override fun onNoteUpdated() {
+		finish()
+	}
+
 	private fun showDeleteNoteDialog() {
 		val dialog =
 			AlertDialog.Builder(this)
 				.setMessage(R.string.confirm_delete)
 				.setPositiveButton(R.string.delete) { _, _ ->
 					viewModel.deleteNote(note!!)
-					setResult(RESULT_OK)
 					finish()
 				}
 				.setNegativeButton(R.string.cancel) { dialogInterface, _ ->
@@ -117,21 +122,21 @@ class NoteDetailActivity : AppCompatActivity() {
 		dialog.show()
 	}
 
-	private fun saveNote() {
-		val currentNote = (currentFragment as EditNoteFragment).getNote()
-		currentNote?.let {
-			lifecycleScope.launch {
-				viewModel.addNote(currentNote)
-				setResult(RESULT_OK)
-				finish()
-			}
-		} ?: run {
-			if(!isNewNote) {
-				showDeleteNoteDialog()
-			} else {
-				setResult(RESULT_CANCELED)
-				finish()
-			}
-		}
-	}
+//	private fun saveNote() {
+//		val currentNote = (currentFragment as EditNoteFragment).getNote()
+//		currentNote?.let {
+//			lifecycleScope.launch {
+//				viewModel.addNote(currentNote)
+//				setResult(RESULT_OK)
+//				finish()
+//			}
+//		} ?: run {
+//			if(!isNewNote) {
+//				showDeleteNoteDialog()
+//			} else {
+//				setResult(RESULT_CANCELED)
+//				finish()
+//			}
+//		}
+//	}
 }

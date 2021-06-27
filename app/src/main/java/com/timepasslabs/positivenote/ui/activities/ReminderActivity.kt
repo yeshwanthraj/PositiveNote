@@ -11,7 +11,6 @@ import android.widget.Toast
 import com.timepasslabs.positivenote.AlarmReceiver
 import com.timepasslabs.positivenote.NoteAppConstants
 import com.timepasslabs.positivenote.R
-import kotlinx.android.synthetic.main.activity_reminder.*
 import java.util.*
 import kotlin.math.min
 
@@ -27,12 +26,12 @@ class ReminderActivity : AppCompatActivity() {
 	}
 
 	private fun setupUi() {
-		done.setOnClickListener {
-			val hours = getHours()
-			val minutes = getMinutes()
-			setUpReminder(hours,minutes)
-			storeReminderTime(hours,minutes)
-		}
+//		done.setOnClickListener {
+//			val hours = getHours()
+//			val minutes = getMinutes()
+//			setUpReminder(hours,minutes)
+//			storeReminderTime(hours,minutes)
+//		}
 	}
 
 	private fun setUpReminder(hours : Int, minutes : Int) {
@@ -73,8 +72,8 @@ class ReminderActivity : AppCompatActivity() {
 				apply()
 			}
 
-	private fun getHours() = timePicker.hour
-
-	private fun getMinutes() = timePicker.minute
+//	private fun getHours() = timePicker.hour
+//
+//	private fun getMinutes() = timePicker.minute
 
 }

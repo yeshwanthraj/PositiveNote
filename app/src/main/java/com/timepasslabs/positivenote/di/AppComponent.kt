@@ -9,7 +9,7 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [RoomModule::class])
+@Component(modules = [RoomModule::class,AppSubComponents::class])
 interface AppComponent {
 
 	@Component.Factory
@@ -19,7 +19,7 @@ interface AppComponent {
 
 	fun getNoteRepository() : NoteRepository
 
-	fun inject(noteDetailActivity: NoteDetailActivity)
+	fun getNoteDetailComponent() : NoteDetailComponent.Factory
 
 	fun inject(mainActivity: MainActivity)
 

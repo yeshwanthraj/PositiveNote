@@ -10,7 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import javax.inject.Singleton
 
 @Singleton
-@Database(entities = [Note::class],version = 4)
+@Database(entities = [Note::class],version = 3)
 abstract class NoteDatabase : RoomDatabase() {
 
     abstract fun getNoteDao() : NoteDao

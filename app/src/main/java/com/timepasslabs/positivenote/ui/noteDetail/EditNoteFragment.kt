@@ -4,26 +4,25 @@ import android.app.DatePickerDialog
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
-import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModel
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStore
 import com.skydoves.powerspinner.OnSpinnerOutsideTouchListener
 import com.skydoves.powerspinner.SpinnerGravity
+import com.timepasslabs.positivenote.CustomViewModelFactory
 import com.timepasslabs.positivenote.R
 import com.timepasslabs.positivenote.data.Note
-import com.timepasslabs.positivenote.data.DateUtil
+import com.timepasslabs.positivenote.DateUtil
 import com.timepasslabs.positivenote.databinding.FragmentEditNoteBinding
-import kotlinx.android.synthetic.main.fragment_edit_note.*
+import com.timepasslabs.positivenote.extensions.toast
+
 import java.util.*
+import javax.inject.Inject
 
 private const val NOTE = "note"
 
@@ -31,20 +30,24 @@ private const val TAG = "EditNoteFragment"
 
 class EditNoteFragment : Fragment() {
 
-	private lateinit var note: Note
+	private var note: Note? = null
 
 	private val daySelectionList = listOf("today","yesterday","pick date")
 
 	private var currentSelection = 0
 
+	@Inject lateinit var viewModelFactory : CustomViewModelFactory
+
 	private val noteDetailViewModel by lazy {
-		ViewModelProvider(requireActivity()).get(NoteDetailViewModel::class.java)
+		ViewModelProvider(requireActivity(),viewModelFactory).get(NoteDetailViewModel::class.java)
 	}
 
 	private lateinit var viewBinding : FragmentEditNoteBinding
 
+	private lateinit var noteDetailCallback: NoteDetailCallback
+
 	companion object {
-		fun newInstance(note: Note) =
+		fun newInstance(note: Note?) =
 			EditNoteFragment().apply {
 				arguments = Bundle().apply {
 					putParcelable(NOTE, note)
@@ -52,10 +55,16 @@ class EditNoteFragment : Fragment() {
 			}
 	}
 
+	override fun onAttach(context: Context) {
+		super.onAttach(context)
+		(requireActivity() as NoteDetailActivity).noteDetailComponent.create().inject(this)
+		noteDetailCallback = context as NoteDetailCallback
+	}
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		arguments?.let {
-			note = it.getParcelable(NOTE) ?: Note()
+			note = it.getParcelable(NOTE)
 		}
 	}
 
@@ -63,27 +72,74 @@ class EditNoteFragment : Fragment() {
 		inflater: LayoutInflater, container: ViewGroup?,
 		savedInstanceState: Bundle?
 	): View {
-		viewBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_edit_note,container,false)
-		viewBinding.note = note
+		viewBinding = FragmentEditNoteBinding.inflate(inflater,container,false)
 		return viewBinding.root
 	}
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 		setupSpinner()
-		if (viewBinding.noteDetails.requestFocus()) {
+		viewBinding.apply {
+			if(note != null) {
+				noteDetails.setText(note!!.details)
+				noteTitle.setText(note!!.title)
+				dateSpinner.text = DateUtil.getDateForSpinner(note!!.date)
+			}
+		}
+		if (viewBinding.noteTitle.requestFocus()) {
 			if(note != null) {
 				val imm =
 					requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-				imm.showSoftInput(noteDetails, InputMethodManager.SHOW_IMPLICIT)
+				imm.showSoftInput(viewBinding.noteTitle, InputMethodManager.SHOW_IMPLICIT)
 			} else {
 				requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
 			}
 		}
 	}
 
-	fun updateNote() {
-//		if(note)
+	fun updateNote() = viewBinding.run {
+		if(note != null) {
+			if(noteTitle.text.isNotEmpty()
+				|| noteDetails.text.isNotEmpty()) {
+				// Updating already existing note or create new note
+				note = note!!.apply {
+					title = noteTitle.text.toString()
+					details = noteDetails.text.toString()
+					date = DateUtil.getDateForDb(dateSpinner.text.toString())
+					lastUpdate = System.currentTimeMillis()
+				}
+				noteDetailViewModel.addNote(note!!)
+				noteDetailCallback.onNoteUpdated()
+			} else {
+				showDeleteNoteDialog()
+			}
+		} else {
+			if(noteTitle.text.isEmpty() && noteDetails.text.isEmpty()) {
+				requireContext().toast(R.string.empty_note)
+			} else {
+				note = Note(noteTitle.text.toString(),
+					noteDetails.text.toString(),
+					DateUtil.getDateForDb(dateSpinner.text.toString()),
+					System.currentTimeMillis())
+				noteDetailViewModel.addNote(note!!)
+			}
+			noteDetailCallback.onNoteUpdated()
+		}
+	}
+
+	private fun showDeleteNoteDialog() {
+		val dialog =
+			AlertDialog.Builder(requireContext())
+				.setMessage(R.string.note_cleared)
+				.setPositiveButton(R.string.delete) { _, _ ->
+					note?.let { noteDetailViewModel.deleteNote(it) }
+					noteDetailCallback.onNoteUpdated()
+				}
+				.setNegativeButton(R.string.cancel) { dialogInterface, _ ->
+					dialogInterface.dismiss()
+				}
+		dialog.setCancelable(false)
+		dialog.show()
 	}
 
 	private fun setupSpinner() {
@@ -115,8 +171,7 @@ class EditNoteFragment : Fragment() {
 		val datePickerDialog = DatePickerDialog(
 			requireContext(),
 			{ _, year, month, dayOfMonth ->
-				val dateString = DateUtil.getDateForSpinner(dayOfMonth, month, year)
-				note.date = DateUtil.getDateForDb(dateString)
+				viewBinding.dateSpinner.text = DateUtil.getDateForSpinner(dayOfMonth, month, year)
 			},
 			calender.get(Calendar.YEAR),
 			calender.get(Calendar.MONTH),
@@ -127,30 +182,15 @@ class EditNoteFragment : Fragment() {
 		datePickerDialog.setCancelable(false)
 		datePickerDialog.setCanceledOnTouchOutside(false)
 		datePickerDialog.setOnCancelListener {
-			Toast.makeText(requireContext(), "Date not set. Resetting to today", Toast.LENGTH_SHORT).show()
-			dateSpinner.selectItemByIndex(0)
+			if(note != null) {
+				viewBinding.dateSpinner.text = DateUtil.getDateForSpinner(note!!.date)
+			} else {
+				viewBinding.dateSpinner.selectItemByIndex(0)
+			}
 		}
 	}
 
-	fun getNote() : Note? =
-		if(noteTitle.text.isNotEmpty()
-			|| noteDetails.text.isNotEmpty()) {
-			// Updating already existing note or create new note
-			note?.let {
-				Note(
-					noteTitle.text.toString(),
-					noteDetails.text.toString(),
-					DateUtil.getDateForDb(dateSpinner.text.toString()),
-					System.currentTimeMillis(),
-					note!!.id
-				)
-			} ?: Note(
-				noteTitle.text.toString(),
-				noteDetails.text.toString(),
-				DateUtil.getDateForDb(dateSpinner.text.toString()),
-				System.currentTimeMillis(),
-			)
-		} else {
-			null
-		}
+	interface NoteDetailCallback {
+		fun onNoteUpdated()
+	}
 }

@@ -1,4 +1,4 @@
-package com.timepasslabs.positivenote.data
+package com.timepasslabs.positivenote
 
 import android.annotation.SuppressLint
 import android.util.Log

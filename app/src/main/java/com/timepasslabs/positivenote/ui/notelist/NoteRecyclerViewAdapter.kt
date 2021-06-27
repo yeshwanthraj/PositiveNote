@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.timepasslabs.positivenote.R
 import com.timepasslabs.positivenote.data.Note
-import com.timepasslabs.positivenote.data.DateUtil
+import com.timepasslabs.positivenote.DateUtil
 
 private const val TAG = "NoteRecyclerViewAdapter"
 

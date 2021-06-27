@@ -11,6 +11,8 @@
     <string name="date_label">Note for</string>
     <string name="edit">edit</string>
     <string name="delete">Delete</string>
-    <string name="confirm_delete">Note is empty. Delete note?</string>
+    <string name="confirm_delete">Delete note?</string>
+    <string name="note_cleared">Do you want to delete the entry?</string>
+    <string name="empty_note">Empty note discarded</string>
     <string name="cancel">Cancel</string>
 </resources>
