@@ -34,9 +34,9 @@ class EditNoteFragment : Fragment() {
 
 	private val daySelectionList = listOf("today","yesterday","pick date")
 
-	private var currentSelection = 0
-
 	@Inject lateinit var viewModelFactory : CustomViewModelFactory
+
+	private lateinit var selectedDate : String
 
 	private val noteDetailViewModel by lazy {
 		ViewModelProvider(requireActivity(),viewModelFactory).get(NoteDetailViewModel::class.java)
@@ -86,11 +86,11 @@ class EditNoteFragment : Fragment() {
 				dateSpinner.text = DateUtil.getDateForSpinner(note!!.date)
 			}
 		}
-		if (viewBinding.noteTitle.requestFocus()) {
+		if (viewBinding.noteDetails.requestFocus()) {
 			if(note != null) {
 				val imm =
 					requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-				imm.showSoftInput(viewBinding.noteTitle, InputMethodManager.SHOW_IMPLICIT)
+				imm.showSoftInput(viewBinding.noteDetails, InputMethodManager.SHOW_IMPLICIT)
 			} else {
 				requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
 			}
@@ -142,28 +142,28 @@ class EditNoteFragment : Fragment() {
 		dialog.show()
 	}
 
-	private fun setupSpinner() {
-		viewBinding.dateSpinner.apply {
-			showArrow = true
-			arrowPadding = 4
-			arrowResource = R.drawable.ic_arrow_down
-			arrowTint = R.color.black
-			arrowGravity = SpinnerGravity.END
-			showDivider = true
-			dividerColor = Color.GRAY
-			spinnerPopupBackgroundColor = Color.WHITE
-			spinnerPopupWidth = 350
-			paint.isUnderlineText = true
-			spinnerOutsideTouchListener = OnSpinnerOutsideTouchListener { _, _ -> dismiss() }
-			setItems(daySelectionList)
-			setOnSpinnerItemSelectedListener<String> { _, _, newIndex, _ ->
-				currentSelection = newIndex
-				if(newIndex ==  daySelectionList.size - 1) {
-					showCalenderDialog()
-				}
-				dismiss()
+	private fun setupSpinner() = viewBinding.dateSpinner.apply {
+		showArrow = true
+		arrowPadding = 4
+		arrowResource = R.drawable.ic_arrow_down
+		arrowTint = R.color.black
+		arrowGravity = SpinnerGravity.END
+		showDivider = true
+		dividerColor = Color.GRAY
+		spinnerPopupBackgroundColor = Color.WHITE
+		spinnerPopupWidth = 350
+		paint.isUnderlineText = true
+		spinnerOutsideTouchListener = OnSpinnerOutsideTouchListener { _, _ -> dismiss() }
+		setItems(daySelectionList)
+		setOnSpinnerItemSelectedListener<String> { _, _, newIndex, _ ->
+			if (newIndex == daySelectionList.size - 1) {
+				showCalenderDialog()
+			} else {
+				selectedDate = daySelectionList[newIndex]
 			}
+			dismiss()
 		}
+		selectedDate = text.toString()
 	}
 
 	private fun showCalenderDialog() {
@@ -171,7 +171,8 @@ class EditNoteFragment : Fragment() {
 		val datePickerDialog = DatePickerDialog(
 			requireContext(),
 			{ _, year, month, dayOfMonth ->
-				viewBinding.dateSpinner.text = DateUtil.getDateForSpinner(dayOfMonth, month, year)
+				selectedDate = DateUtil.getDateForSpinner(dayOfMonth, month, year)
+				viewBinding.dateSpinner.text = selectedDate
 			},
 			calender.get(Calendar.YEAR),
 			calender.get(Calendar.MONTH),
@@ -185,7 +186,7 @@ class EditNoteFragment : Fragment() {
 			if(note != null) {
 				viewBinding.dateSpinner.text = DateUtil.getDateForSpinner(note!!.date)
 			} else {
-				viewBinding.dateSpinner.selectItemByIndex(0)
+				viewBinding.dateSpinner.text = selectedDate
 			}
 		}
 	}
