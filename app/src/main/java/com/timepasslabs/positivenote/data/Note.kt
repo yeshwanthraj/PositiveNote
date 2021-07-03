@@ -1,13 +1,9 @@
 package com.timepasslabs.positivenote.data
 
 import android.os.Parcelable
-import android.util.Log
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
-import java.util.*
-
-private const val TAG = "Note"
 
 @Entity(tableName = "notes")
 @Parcelize
@@ -20,13 +16,16 @@ data class Note (
 ) : Parcelable {
 
     override fun equals(other: Any?): Boolean {
-        val isEqual = (other is Note) && this.id == other.id
-        Log.d(TAG, "equals: notes are $isEqual")
-        return isEqual
+        return (other is Note) && id == other.id
     }
 
     override fun hashCode(): Int {
-        return id
+        var result = title.hashCode()
+        result = 31 * result + details.hashCode()
+        result = 31 * result + date.hashCode()
+        result = 31 * result + lastUpdate.hashCode()
+        result = 31 * result + id.hashCode()
+        return result
     }
 
 }

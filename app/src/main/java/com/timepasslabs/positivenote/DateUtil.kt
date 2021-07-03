@@ -11,7 +11,7 @@ object DateUtil {
 
     private const val TAG = "Utils"
 
-    private val storedDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    private val storedDateFormat = SimpleDateFormat("yyyy-MM-ddTHH:mm:ss")
 
     private val uiDateFormat = SimpleDateFormat("dd/MM/yyyy")
 
@@ -28,17 +28,13 @@ object DateUtil {
     )
 
     fun getDateForDb(uiDate : String) : String {
-        val calendar : Calendar
-        when(uiDate.toUpperCase()) {
-            "TODAY" -> {
-                calendar = Calendar.getInstance()
-            }
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("IST"))
+        when(uiDate.uppercase(Locale.ROOT)) {
+            "TODAY" -> { }
             "YESTERDAY" -> {
-                calendar = Calendar.getInstance()
                 calendar.add(Calendar.DAY_OF_YEAR, -1)
             }
             else -> {
-                calendar = Calendar.getInstance()
                 calendar.timeInMillis = System.currentTimeMillis()
                 val dateDetails = uiDate.split(DATE_DELIMITER)
                 calendar.set(Calendar.YEAR,dateDetails[2].toInt())
@@ -65,7 +61,6 @@ object DateUtil {
         val noteDate = Calendar.getInstance()
         noteDate.time = storedDateFormat.parse(storedDate) ?: Date()
         val daysBetweenDates = getDaysBetweenDates(currentDate,noteDate)
-        Log.d(TAG, "getDateForListItem: diff $daysBetweenDates")
         return when(daysBetweenDates) {
             0 -> "Today"
             1 -> "Yesterday"
@@ -74,6 +69,10 @@ object DateUtil {
                 else
                     uiDateFormat.format(noteDate.time)
         }
+    }
+
+    fun convertOldDateFormatToNew(oldDate : String) : String {
+        return "${oldDate.replace(" ","T")}+5:30"
     }
 
     fun getDateForSpinner(dayOfTheMonth : Int,month : Int,year : Int) =

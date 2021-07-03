@@ -43,12 +43,10 @@ class NoteRecyclerViewAdapter(
 		}
 
 		fun bindData(note : Note) {
-			Log.d(TAG, "bindData: note is $note")
 			title.text = note.title
 			desc.text = note.details
 			title.visibility = if(note.title.isEmpty()) View.GONE else View.VISIBLE
 			desc.visibility = if(note.details.isEmpty()) View.GONE else View.VISIBLE
-			Log.d(TAG, "bindData: visibility of title : ${title.visibility} and ${desc.visibility}")
 			date.text = DateUtil.getDateForListItem(note.date)
 		}
 	}
