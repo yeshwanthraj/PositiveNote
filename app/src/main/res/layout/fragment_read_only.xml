@@ -33,7 +33,7 @@
                 android:layout_margin="12dp"
                 android:layout_marginTop="32dp"
                 android:layout_marginEnd="32dp"
-                android:text="@{dateUtil.getDateForSpinner(note.date)}"
+                android:text="@{dateUtil.getDateForSpinner(note.timestamp)}"
                 android:textStyle="italic"
                 />
 

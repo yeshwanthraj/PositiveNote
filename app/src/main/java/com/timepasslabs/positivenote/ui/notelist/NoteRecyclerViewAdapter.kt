@@ -1,6 +1,5 @@
 package com.timepasslabs.positivenote.ui.notelist
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,7 +46,7 @@ class NoteRecyclerViewAdapter(
 			desc.text = note.details
 			title.visibility = if(note.title.isEmpty()) View.GONE else View.VISIBLE
 			desc.visibility = if(note.details.isEmpty()) View.GONE else View.VISIBLE
-			date.text = DateUtil.getDateForListItem(note.date)
+			date.text = DateUtil.getDateForListItem(note.timestamp)
 		}
 	}
 }

@@ -45,7 +45,7 @@ class DataBaseCrudTest {
     @Test
     suspend fun updateNote() {
         val updatedNoteTitle = "updated ${testNote.title}"
-        val updatedNote = Note(updatedNoteTitle,testNote.details,testNote.date,testNote.lastUpdate,testNote.id)
+        val updatedNote = Note(updatedNoteTitle,testNote.details,testNote.timestamp,testNote.lastUpdate,testNote.id)
         runBlockingTest {
             noteDao.insertNote(updatedNote)
         }

@@ -13,7 +13,7 @@ import javax.inject.Singleton
 private const val TAG = "NoteDatabase"
 
 @Singleton
-@Database(entities = [Note::class],version = 7, exportSchema = true)
+@Database(entities = [Note::class],version = 15, exportSchema = true)
 abstract class NoteDatabase : RoomDatabase() {
 
     abstract fun getNoteDao() : NoteDao
@@ -37,24 +37,28 @@ abstract class NoteDatabase : RoomDatabase() {
             }
         }
 
-        private val Migration_6_7 = object : Migration(6,7) {
+        private val Migration_7_8 = object : Migration(14,15) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                val cursor = database.query("Select * from notes")
+                val cursor = database.query("select * from notes_temp")
                 val dateColumnId = cursor.getColumnIndex("date")
                 val noteIdColumnId = cursor.getColumnIndex("id")
-                Log.d(TAG, "migrate: dateColumnId and noteIdColumnId are $dateColumnId and $noteIdColumnId")
+                database.execSQL("ALTER TABLE `notes` ADD COLUMN `timestamp` INTEGER NOT NULL DEFAULT 0")
                 cursor.moveToFirst()
                 while(!cursor.isAfterLast) {
                     val oldDate = cursor.getString(dateColumnId)
-                    val noteId = cursor.getInt(noteIdColumnId)
-                    val newDate = DateUtil.convertOldDateFormatToNew(oldDate)
-                    Log.d(TAG, "migrate: date columnId. old date = $oldDate , newDate = $newDate")
-                    Log.d(TAG, "migrate: id index is $noteIdColumnId")
-                    database.execSQL("UPDATE notes SET date = '$newDate' WHERE id = $noteId")
+                    val noteId : Long = cursor.getLong(noteIdColumnId)
+                    val newDate : Long = DateUtil.convertOldDateFormatToNew(oldDate)
+                    Log.d(TAG, "migrate: id = $noteId old date : $oldDate & new date = $newDate")
+                    Log.d(
+                        TAG,
+                        "migrate: noteId = $noteId, timeStamp = $newDate"
+                    )
+                    database.execSQL("UPDATE `notes` set timestamp = " + DateUtil.convertOldDateFormatToNew(cursor.getString(cursor.getColumnIndex("date"))) + " WHERE id = " + cursor.getLong(cursor.getColumnIndex("id")))
                     cursor.moveToNext()
                 }
                 Log.d(TAG, "migrate: end of migration")
                 cursor.close()
+//                throw Exception("sdk")
             }
         }
 
@@ -62,7 +66,7 @@ abstract class NoteDatabase : RoomDatabase() {
             Room.databaseBuilder(application,NoteDatabase::class.java,"note_database.db")
                 .addMigrations(MIGRATION_1_2)
                 .addMigrations(MIGRATION_2_3)
-                .addMigrations(Migration_6_7)
+                .addMigrations(Migration_7_8)
                 .build()
     }
 

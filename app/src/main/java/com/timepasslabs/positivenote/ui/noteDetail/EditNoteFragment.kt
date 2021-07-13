@@ -83,7 +83,7 @@ class EditNoteFragment : Fragment() {
 			if(note != null) {
 				noteDetails.setText(note!!.details)
 				noteTitle.setText(note!!.title)
-				dateSpinner.text = DateUtil.getDateForSpinner(note!!.date)
+				dateSpinner.text = DateUtil.getDateForSpinner(note!!.timestamp)
 			}
 		}
 		if (viewBinding.noteDetails.requestFocus()) {
@@ -105,7 +105,7 @@ class EditNoteFragment : Fragment() {
 				note = note!!.apply {
 					title = noteTitle.text.toString()
 					details = noteDetails.text.toString()
-					date = DateUtil.getDateForDb(dateSpinner.text.toString())
+					timestamp = DateUtil.getDateForDb(dateSpinner.text.toString())
 					lastUpdate = System.currentTimeMillis()
 				}
 				noteDetailViewModel.addNote(note!!)
@@ -184,7 +184,7 @@ class EditNoteFragment : Fragment() {
 		datePickerDialog.setCanceledOnTouchOutside(false)
 		datePickerDialog.setOnCancelListener {
 			if(note != null) {
-				viewBinding.dateSpinner.text = DateUtil.getDateForSpinner(note!!.date)
+				viewBinding.dateSpinner.text = DateUtil.getDateForSpinner(note!!.timestamp)
 			} else {
 				viewBinding.dateSpinner.text = selectedDate
 			}

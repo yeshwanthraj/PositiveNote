@@ -3,6 +3,7 @@ package com.timepasslabs.positivenote
 import android.annotation.SuppressLint
 import android.util.Log
 import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.math.abs
 
@@ -11,11 +12,11 @@ object DateUtil {
 
     private const val TAG = "Utils"
 
-    private val storedDateFormat = SimpleDateFormat("yyyy-MM-ddTHH:mm:ss")
-
-    private val uiDateFormat = SimpleDateFormat("dd/MM/yyyy")
+    private val storedDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
 
     private const val DATE_DELIMITER = "/"
+
+    private val uiDateFormat = SimpleDateFormat("dd${DATE_DELIMITER}MM${DATE_DELIMITER}yyyy")
 
     private val weekDateNumToString  = mapOf(
         1 to "Sunday",
@@ -27,8 +28,8 @@ object DateUtil {
         7 to "Saturday"
     )
 
-    fun getDateForDb(uiDate : String) : String {
-        val calendar = Calendar.getInstance(TimeZone.getTimeZone("IST"))
+    fun getDateForDb(uiDate : String) : Long {
+        val calendar = getIstCalender()
         when(uiDate.uppercase(Locale.ROOT)) {
             "TODAY" -> { }
             "YESTERDAY" -> {
@@ -42,13 +43,13 @@ object DateUtil {
                 calendar.set(Calendar.DAY_OF_MONTH,dateDetails[0].toInt())
             }
         }
-        return storedDateFormat.format(calendar.time)
+        return calendar.timeInMillis
     }
 
-    fun getDateForSpinner(storedDate : String) : String {
-        val currentDate = Calendar.getInstance()
-        val noteDate = Calendar.getInstance()
-        noteDate.time = storedDateFormat.parse(storedDate) ?: Date()
+    fun getDateForSpinner(storedDate : Long) : String {
+        val currentDate = getIstCalender()
+        val noteDate = getIstCalender()
+        noteDate.timeInMillis = storedDate
         return when(getDaysBetweenDates(currentDate,noteDate)) {
             0 -> "Today"
             1 -> "Yesterday"
@@ -56,12 +57,11 @@ object DateUtil {
         }
     }
 
-    fun getDateForListItem(storedDate: String) : String {
-        val currentDate = Calendar.getInstance()
-        val noteDate = Calendar.getInstance()
-        noteDate.time = storedDateFormat.parse(storedDate) ?: Date()
-        val daysBetweenDates = getDaysBetweenDates(currentDate,noteDate)
-        return when(daysBetweenDates) {
+    fun getDateForListItem(storedDate: Long) : String {
+        val currentDate = getIstCalender()
+        val noteDate = getIstCalender()
+        noteDate.timeInMillis = storedDate
+        return when(val daysBetweenDates = getDaysBetweenDates(currentDate,noteDate)) {
             0 -> "Today"
             1 -> "Yesterday"
             else -> return if(daysBetweenDates < 7)
@@ -71,8 +71,8 @@ object DateUtil {
         }
     }
 
-    fun convertOldDateFormatToNew(oldDate : String) : String {
-        return "${oldDate.replace(" ","T")}+5:30"
+    fun convertOldDateFormatToNew(oldDate : String) : Long {
+        return storedDateFormat.parse(oldDate).time
     }
 
     fun getDateForSpinner(dayOfTheMonth : Int,month : Int,year : Int) =
@@ -81,5 +81,7 @@ object DateUtil {
     //TODO: this fails if the year is different
     private fun getDaysBetweenDates(currentDate: Calendar, pastDate: Calendar) : Int =
         abs(currentDate.get(Calendar.DAY_OF_YEAR) - pastDate.get(Calendar.DAY_OF_YEAR))
+
+    private fun getIstCalender(): Calendar = Calendar.getInstance(TimeZone.getTimeZone("IST"))
 
 }

@@ -11,7 +11,7 @@ interface NoteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNote(note : Note)
 
-    @Query("Select * from notes ORDER BY date DESC")
+    @Query("Select * from notes ORDER BY timestamp DESC")
     fun getAllNotes() : Flow<List<Note>>
 
     @Query("SELECT * FROM notes WHERE id = :id")
